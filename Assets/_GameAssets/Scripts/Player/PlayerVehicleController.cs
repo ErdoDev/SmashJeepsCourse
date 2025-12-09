@@ -1,9 +1,9 @@
-using System;
+using Unity.Netcode;
 using System.Collections.Generic;
-using UnityEditorInternal;
 using UnityEngine;
+using Cysharp.Threading.Tasks;
 
-public class PlayerVehicleController : MonoBehaviour
+public class PlayerVehicleController : NetworkBehaviour
 {
     public class SpringData
     {
@@ -44,14 +44,24 @@ public class PlayerVehicleController : MonoBehaviour
         }
     }
 
+    public override void OnNetworkSpawn()
+    {
+        _vehicleRigidbody.isKinematic = true;
+        SetOwnerRigidbodyIsKinematicAsync();
+    }
+
     private void Update()
     {
+        if(!IsOwner) { return;}
+        
         SetSteerInput(Input.GetAxis("Horizontal"));
         SetAccelerateInput(Input.GetAxis("Vertical"));
     }
 
     private void FixedUpdate()
     {
+        if(!IsOwner) { return;}
+
         UpdateSuspension();
         UpdateSteering();
         UpdateAcceleration();
@@ -299,6 +309,15 @@ public class PlayerVehicleController : MonoBehaviour
     public float GetSpringCurrentLength(WheelType wheelType)
     {
         return _springDatas[wheelType]._currentLength;
+    }
+
+    private async void SetOwnerRigidbodyIsKinematicAsync()
+    {
+        if (IsOwner)
+        {
+            await UniTask.DelayFrame(1);
+            _vehicleRigidbody.isKinematic = false;
+        }
     }
 }
 
