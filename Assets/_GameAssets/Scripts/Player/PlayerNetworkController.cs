@@ -1,7 +1,6 @@
 using Unity.Netcode;
 using Unity.Cinemachine;
 using UnityEngine;
-using Unity.Services.Matchmaker.Models;
 
 public class PlayerNetworkController : NetworkBehaviour
 {
